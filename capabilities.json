@@ -1,0 +1,60 @@
+{
+    "dataRoles": [{
+            "displayName": "Axis",
+            "name": "category",
+            "kind": "Grouping"
+        },
+        {
+            "displayName": "Values",
+            "name": "measure",
+            "kind": "Measure"
+        },
+        {
+            "displayName": "Order",
+            "name": "order",
+            "kind": "Measure",
+            "requiredTypes": [{
+                "integer": true
+            }]
+        }
+    ],
+    "objects": {},
+    "dataViewMappings": [{
+        "conditions": [{
+                "category": {
+                    "max": 1
+                }
+            },
+            {
+                "measure": {
+                    "max": 1
+                }
+            },
+            {
+                "order": {
+                    "max": 1
+                }
+            }
+        ],
+        "categorical": {
+            "categories": {
+                "for": {
+                    "in": "category"
+                },
+                "dataReductionAlgorithm": {
+                    "top": {}
+                }
+            },
+            "values": {
+                "select": [{
+                    "bind": {
+                        "to": "measure"
+                    }
+                }]
+            }
+        }
+    }],
+    "sorting": {
+        "default": {}
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "version": "1.0.0",
+    "author": {"name":"Silas Hallahan","email":"silasishallahan@gmail.com"},
+    "resources": [
+        {
+            "resourceId": "rId0",
+            "sourceType": 5,
+            "file": "resources/barScaleFE80866A28C34628876B06375447C054.pbiviz.json"
+        }
+    ],
+    "visual": {"name":"barScale","displayName":"BarScale","guid":"barScaleFE80866A28C34628876B06375447C054","visualClassName":"Visual","version":"1.0.0","description":"n/a","supportUrl":"n/a","gitHubUrl":"n/a"},
+    "metadata": {
+        "pbivizjson": {
+            "resourceId": "rId0"
+        }
+    }  
+}
