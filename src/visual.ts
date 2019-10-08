@@ -123,15 +123,15 @@ export class Visual implements IVisual {
         let yBar = this.yBars;
         yBar.call(d3.axisLeft(yScale));
 
-        this.svg.selectAll('myRect')
+        this.svg.selectAll('rect')
             .data(this.viewModel.dataPoints)
             .enter()
             .append('rect')
-            .attr('x', xScale(0))
+            .attr('x', (d) => (width / 2) - (xScale(d.value) / 2))
             .attr('y', (d) => yScale(d.category))
             .attr('width', (d) => xScale(d.value))
             .attr('height', yScale.bandwidth())
-            .attr('fill', 'blue');
+            .attr('fill', 'darkgray');
 
         // let yScale = d3.scaleLinear()
         //     .domain([0, this.viewModel.maxValue])
