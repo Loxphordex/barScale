@@ -115,7 +115,7 @@ export class Visual implements IVisual {
         // * Axis
         let xScale = d3.scaleLinear()
             .domain([-100, 100])
-            .range([81, width]);
+            .range([81, width - 80]);
         let xAxis = this.xAxis;
         xAxis.attr('transform', `translate(0, ${height - 50})`)
             .call(d3.axisBottom(xScale))
@@ -138,6 +138,7 @@ export class Visual implements IVisual {
             .domain(this.viewModel.dataPoints.map(d => d.category))
             .padding(0.95);
 
+        // * Gradient
         let grad = this.gradient
             .append('linearGradient');
         grad
@@ -145,19 +146,19 @@ export class Visual implements IVisual {
             .attr('x1', '0%')
             .attr('y1', '0%')
             .attr('x2', '100%')
-            .attr('y2', '100%')
+            .attr('y2', '40%')
             .attr('spreadMethod', 'pad');
         grad.append('stop')
             .attr('offset', '0%')
-            .attr('stop-color', '#0c0')
+            .attr('stop-color', '#c00')
             .attr('stop-opacity', 1);
         grad.append('stop')
             .attr('offset', '100%')
-            .attr('stop-color', '#c00')
+            .attr('stop-color', '#0c0')
             .attr('stop-opacity', 1);
 
         // * Rect
-        let bars = this.svg
+        let bars = this.barGroup
             .selectAll('.bar')
             .data(this.viewModel.dataPoints);
         bars.enter()
@@ -165,7 +166,7 @@ export class Visual implements IVisual {
             .classed('bar', true)
             .attr('x', xScale(-100))
             .attr('y', (d) => yScale(d.category))
-            .attr('width', width)
+            .attr('width', width - 160)
             .attr('height', yScale.bandwidth())
             .attr('fill', 'url(#gradient)');
 
@@ -176,12 +177,16 @@ export class Visual implements IVisual {
         scale.enter()
             .append('rect')
             .classed('scale-bar', true)
-            .attr('x', xScale(-100))
+            .attr('x', (d) => xScale(-100))
             .attr('y', (d) => yScale(d.category) + 18)
-            .attr('width', width)
+            .attr('width', (d) => {
+                if (d.value >= 0) {
+                    return width - 160;
+                }
+                return width - 160;
+            })
             .attr('height', innerYScale.bandwidth())
             .attr('fill', 'black');
-
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
