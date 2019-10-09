@@ -94,10 +94,8 @@ export class Visual implements IVisual {
     }
 
     public update(options: VisualUpdateOptions) {
-        console.log('updated');
-        //
-        // ** VIEW SETUP
-        //
+
+        // * VIEW SETUP
         this.viewModel = this.getViewModel(options);
 
         let width: number = options.viewport.width;
@@ -106,16 +104,18 @@ export class Visual implements IVisual {
         this.svg.attr('width', width);
         this.svg.attr('height', height);
 
+        // * Axis
         let xScale = d3.scaleLinear()
             .domain([0, this.viewModel.maxValue])
             .range([0, width]);
         let bars = this.barGroup;
-        bars.attr('transform', `translate(0, ${height})`)
+        bars.attr('transform', `translate(0, ${height - 50})`)
             .call(d3.axisBottom(xScale))
             .selectAll('text')
             .attr('transform', 'translate(-10,0)rotate(-45)')
             .style('text-anchor', 'end');
 
+        // * Y Axis
         let yScale = d3.scaleBand()
             .range([0, height])
             .domain(this.viewModel.dataPoints.map(d => d.category))
@@ -123,32 +123,16 @@ export class Visual implements IVisual {
         let yBar = this.yBars;
         yBar.call(d3.axisLeft(yScale));
 
+        // * Rect
         this.svg.selectAll('rect')
             .data(this.viewModel.dataPoints)
             .enter()
             .append('rect')
-            .attr('x', (d) => (width / 2) - (xScale(d.value) / 2))
+            .attr('x', xScale(0))
             .attr('y', (d) => yScale(d.category))
-            .attr('width', (d) => xScale(d.value))
-            .attr('height', yScale.bandwidth())
+            .attr('width', width)
+            .attr('height', yScale.bandwidth() / 3)
             .attr('fill', 'darkgray');
-
-        // let yScale = d3.scaleLinear()
-        //     .domain([0, this.viewModel.maxValue])
-        //     .range([height - this.settings.axis.x.padding, height * 0.2]);
-
-        // let xScale = d3.scaleBand()
-        //     .domain(this.viewModel.dataPoints.map(data => data.category))
-        //     .rangeRound([0, width])
-        //     .padding(this.xPadding);
-
-        // let xAxis = d3.axisBottom(xScale)
-        //     .scale(xScale)
-        //     .tickSize(1);
-
-        // this.xAxisGroup
-        //     .call(xAxis)
-        //     .attr('transform', `translate(0, ${height - this.settings.axis.x.padding})`);
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
