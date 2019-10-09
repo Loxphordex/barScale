@@ -107,7 +107,7 @@ export class Visual implements IVisual {
         // * Axis
         let xScale = d3.scaleLinear()
             .domain([0, this.viewModel.maxValue])
-            .range([0, width]);
+            .range([81, width]);
         let bars = this.barGroup;
         bars.attr('transform', `translate(0, ${height - 50})`)
             .call(d3.axisBottom(xScale))
@@ -119,19 +119,20 @@ export class Visual implements IVisual {
         let yScale = d3.scaleBand()
             .range([0, height])
             .domain(this.viewModel.dataPoints.map(d => d.category))
-            .padding(0.1);
+            .padding(0.65);
         let yBar = this.yBars;
-        yBar.call(d3.axisLeft(yScale));
+        yBar.call(d3.axisLeft(yScale))
+            .attr('transform', 'translate(80, 0)')
 
         // * Rect
         this.svg.selectAll('rect')
             .data(this.viewModel.dataPoints)
             .enter()
             .append('rect')
-            .attr('x', xScale(0))
+            .attr('x', xScale(80))
             .attr('y', (d) => yScale(d.category))
             .attr('width', width)
-            .attr('height', yScale.bandwidth() / 3)
+            .attr('height', yScale.bandwidth())
             .attr('fill', 'darkgray');
     }
 
