@@ -64,7 +64,8 @@ export class Visual implements IVisual {
     private xAxis: Selection<SVGElement>;
     private yAxis: Selection<SVGElement>;
     private scaleGroup: Selection<SVGElement>;
-    private pBarGroup: Selection<SVGElement>;
+    private barGroup: Selection<SVGElement>;
+    private gradient: Selection<SVGElement>;
     private labelGroup: Selection<SVGElement>;
     private dLabelGroup: Selection<SVGElement>;
     private pLabelGroup: Selection<SVGElement>;
@@ -92,8 +93,12 @@ export class Visual implements IVisual {
             .classed('xAxis', true);
         this.yAxis = this.svg.append('g')
             .classed('yAxis', true);
+        this.barGroup = this.svg.append('g')
+            .classed('bar-group', true);
         this.scaleGroup = this.svg.append('g')
             .classed('scale-group', true);
+        this.gradient = this.svg.append('defs')
+            .classed('gradient', true);
     }
 
     public update(options: VisualUpdateOptions) {
@@ -123,25 +128,60 @@ export class Visual implements IVisual {
             .range([0, height])
             .domain(this.viewModel.dataPoints.map(d => d.category))
             .padding(0.65);
+
         let yAxis = this.yAxis;
         yAxis.call(d3.axisLeft(yScale))
             .attr('transform', 'translate(80, 0)');
 
+        let innerYScale = d3.scaleBand()
+            .range([0, height])
+            .domain(this.viewModel.dataPoints.map(d => d.category))
+            .padding(0.95);
+
+        let grad = this.gradient
+            .append('linearGradient');
+        grad
+            .attr('id', 'gradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '100%')
+            .attr('spreadMethod', 'pad');
+        grad.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#0c0')
+            .attr('stop-opacity', 1);
+        grad.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#c00')
+            .attr('stop-opacity', 1);
+
         // * Rect
-        this.svg.selectAll('rect')
-            .data(this.viewModel.dataPoints)
-            .enter()
+        let bars = this.svg
+            .selectAll('.bar')
+            .data(this.viewModel.dataPoints);
+        bars.enter()
             .append('rect')
+            .classed('bar', true)
             .attr('x', xScale(-100))
             .attr('y', (d) => yScale(d.category))
             .attr('width', width)
             .attr('height', yScale.bandwidth())
-            .attr('fill', 'darkgray');
+            .attr('fill', 'url(#gradient)');
 
         // * Scale
-        this.svg.selectAll('.scale-bar')
-            .data(this.viewModel.dataPoints)
-            .classed('scale-bar', true);
+        let scale = this.scaleGroup
+            .selectAll('.scale-bar')
+            .data(this.viewModel.dataPoints);
+        scale.enter()
+            .append('rect')
+            .classed('scale-bar', true)
+            .attr('x', xScale(-100))
+            .attr('y', (d) => yScale(d.category) + 18)
+            .attr('width', width)
+            .attr('height', innerYScale.bandwidth())
+            .attr('fill', 'black');
+
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
