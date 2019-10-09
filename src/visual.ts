@@ -120,7 +120,7 @@ export class Visual implements IVisual {
             .domain([0, 100])
             .range([0, (width / 2) - 80]);
         let xAxis = this.xAxis;
-        xAxis.attr('transform', `translate(0, ${height - 50})`)
+        xAxis.attr('transform', `translate(0, ${height - (height / 12)})`)
             .call(d3.axisBottom(xScale))
             .selectAll('text')
             .attr('transform', 'translate(-10,0)rotate(-45)')
@@ -128,7 +128,7 @@ export class Visual implements IVisual {
 
         // * Y Axis
         let yScale = d3.scaleBand()
-            .range([0, height])
+            .range([20, height - 20])
             .domain(this.viewModel.dataPoints.map(d => d.category))
             .padding(0.65);
 
@@ -178,6 +178,11 @@ export class Visual implements IVisual {
             .attr('width', width - 160)
             .attr('height', yScale.bandwidth())
             .attr('fill', 'url(#gradient)');
+        bars
+            .attr('x', xScale(-100))
+            .attr('y', (d) => yScale(d.category))
+            .attr('width', width - 160)
+            .attr('height', yScale.bandwidth());
 
         // * Scale
         let scale = this.scaleGroup
@@ -187,13 +192,18 @@ export class Visual implements IVisual {
             .append('rect')
             .classed('scale-bar', true)
             .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
-            .attr('y', (d) => yScale(d.category) + 18)
+            .attr('y', (d) => yScale(d.category) + (height / 30))
             .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
             .attr('height', innerYScale.bandwidth())
             // .attr('transform', (d) => {
             //     return (d.value >= 0) ? 'translate(0, 0)' : 'rotate(-180)';
             // })
             .attr('fill', 'black');
+        scale
+            .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
+            .attr('y', (d) => yScale(d.category) + (height / 30))
+            .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
+            .attr('height', innerYScale.bandwidth());
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
