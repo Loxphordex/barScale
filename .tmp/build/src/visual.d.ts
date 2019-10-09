@@ -15,9 +15,11 @@ export declare class Visual implements IVisual {
     private host;
     private locale;
     private svg;
+    private xAxis;
+    private yAxis;
+    private scaleGroup;
     private barGroup;
-    private yBars;
-    private pBarGroup;
+    private gradient;
     private labelGroup;
     private dLabelGroup;
     private pLabelGroup;
