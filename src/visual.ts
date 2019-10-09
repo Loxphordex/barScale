@@ -61,8 +61,9 @@ export class Visual implements IVisual {
     private host: IVisualHost;
     private locale: string;
     private svg: Selection<SVGElement>;
-    private barGroup: Selection<SVGElement>;
-    private yBars: Selection<SVGElement>;
+    private xAxis: Selection<SVGElement>;
+    private yAxis: Selection<SVGElement>;
+    private scaleGroup: Selection<SVGElement>;
     private pBarGroup: Selection<SVGElement>;
     private labelGroup: Selection<SVGElement>;
     private dLabelGroup: Selection<SVGElement>;
@@ -87,10 +88,12 @@ export class Visual implements IVisual {
         this.svg = d3.select(options.element)
             .append('svg')
             .classed('bar-chart', true);
-        this.barGroup = this.svg.append('g')
-            .classed('bar-group', true);
-        this.yBars = this.svg.append('g')
-            .classed('y-bars', true);
+        this.xAxis = this.svg.append('g')
+            .classed('xAxis', true);
+        this.yAxis = this.svg.append('g')
+            .classed('yAxis', true);
+        this.scaleGroup = this.svg.append('g')
+            .classed('scale-group', true);
     }
 
     public update(options: VisualUpdateOptions) {
@@ -106,10 +109,10 @@ export class Visual implements IVisual {
 
         // * Axis
         let xScale = d3.scaleLinear()
-            .domain([0, this.viewModel.maxValue])
+            .domain([-100, 100])
             .range([81, width]);
-        let bars = this.barGroup;
-        bars.attr('transform', `translate(0, ${height - 50})`)
+        let xAxis = this.xAxis;
+        xAxis.attr('transform', `translate(0, ${height - 50})`)
             .call(d3.axisBottom(xScale))
             .selectAll('text')
             .attr('transform', 'translate(-10,0)rotate(-45)')
@@ -120,20 +123,25 @@ export class Visual implements IVisual {
             .range([0, height])
             .domain(this.viewModel.dataPoints.map(d => d.category))
             .padding(0.65);
-        let yBar = this.yBars;
-        yBar.call(d3.axisLeft(yScale))
-            .attr('transform', 'translate(80, 0)')
+        let yAxis = this.yAxis;
+        yAxis.call(d3.axisLeft(yScale))
+            .attr('transform', 'translate(80, 0)');
 
         // * Rect
         this.svg.selectAll('rect')
             .data(this.viewModel.dataPoints)
             .enter()
             .append('rect')
-            .attr('x', xScale(80))
+            .attr('x', xScale(-100))
             .attr('y', (d) => yScale(d.category))
             .attr('width', width)
             .attr('height', yScale.bandwidth())
             .attr('fill', 'darkgray');
+
+        // * Scale
+        this.svg.selectAll('.scale-bar')
+            .data(this.viewModel.dataPoints)
+            .classed('scale-bar', true);
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
