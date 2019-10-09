@@ -61,8 +61,11 @@ export class Visual implements IVisual {
     private host: IVisualHost;
     private locale: string;
     private svg: Selection<SVGElement>;
+    private xAxis: Selection<SVGElement>;
+    private yAxis: Selection<SVGElement>;
+    private scaleGroup: Selection<SVGElement>;
     private barGroup: Selection<SVGElement>;
-    private pBarGroup: Selection<SVGElement>;
+    private gradient: Selection<SVGElement>;
     private labelGroup: Selection<SVGElement>;
     private dLabelGroup: Selection<SVGElement>;
     private pLabelGroup: Selection<SVGElement>;
@@ -86,25 +89,21 @@ export class Visual implements IVisual {
         this.svg = d3.select(options.element)
             .append('svg')
             .classed('bar-chart', true);
+        this.xAxis = this.svg.append('g')
+            .classed('xAxis', true);
+        this.yAxis = this.svg.append('g')
+            .classed('yAxis', true);
         this.barGroup = this.svg.append('g')
             .classed('bar-group', true);
-        this.pBarGroup = this.svg.append('g')
-            .classed('p-bar-group', true);
-        this.labelGroup = this.svg.append('g')
-            .classed('label-group', true);
-        this.dLabelGroup = this.svg.append('g')
-            .classed('d-label-group', true);
-        this.pLabelGroup = this.svg.append('g')
-            .classed('p-label-group', true);
-        this.xAxisGroup = this.svg.append('g')
-            .classed('x-axis', true);
+        this.scaleGroup = this.svg.append('g')
+            .classed('scale-group', true);
+        this.gradient = this.svg.append('defs')
+            .classed('gradient', true);
     }
 
     public update(options: VisualUpdateOptions) {
-        console.log('updated');
-        //
-        // ** VIEW SETUP
-        //
+
+        // * VIEW SETUP
         this.viewModel = this.getViewModel(options);
 
         let width: number = options.viewport.width;
@@ -113,146 +112,98 @@ export class Visual implements IVisual {
         this.svg.attr('width', width);
         this.svg.attr('height', height);
 
-        let yScale = d3.scaleLinear()
-            .domain([0, this.viewModel.maxValue])
-            .range([height - this.settings.axis.x.padding, height * 0.2]);
+        // * Axis
+        let xScale = d3.scaleLinear()
+            .domain([-100, 100])
+            .range([80, width - 80]);
+        let posXScale = d3.scaleLinear()
+            .domain([0, 100])
+            .range([0, (width / 2) - 80]);
+        let xAxis = this.xAxis;
+        xAxis.attr('transform', `translate(0, ${height - (height / 12)})`)
+            .call(d3.axisBottom(xScale))
+            .selectAll('text')
+            .attr('transform', 'translate(-10,0)rotate(-45)')
+            .style('text-anchor', 'end');
 
-        let xScale = d3.scaleBand()
-            .domain(this.viewModel.dataPoints.map(data => data.category))
-            .rangeRound([0, width])
-            .padding(this.xPadding);
+        // * Y Axis
+        let yScale = d3.scaleBand()
+            .range([20, height - 20])
+            .domain(this.viewModel.dataPoints.map(d => d.category))
+            .padding(0.65);
 
-        let xAxis = d3.axisBottom(xScale)
-            .scale(xScale)
-            .tickSize(1);
+        let yAxis = this.yAxis;
+        yAxis.call(d3.axisLeft(yScale))
+            .attr('transform', 'translate(80, 0)');
 
-        this.xAxisGroup
-            .call(xAxis)
-            .attr('transform', `translate(0, ${height - this.settings.axis.x.padding})`);
+        let innerYScale = d3.scaleBand()
+            .range([0, height])
+            .domain(this.viewModel.dataPoints.map(d => d.category))
+            .padding(0.95);
 
-        //
-        // ** BARS
-        //
+        // * Gradient
+        let grad = this.gradient
+            .append('linearGradient');
+        grad
+            .attr('id', 'gradient')
+            .attr('x1', '0%')
+            .attr('y1', '0%')
+            .attr('x2', '100%')
+            .attr('y2', '0%')
+            .attr('spreadMethod', 'pad');
+        grad.append('stop')
+            .attr('offset', '0%')
+            .attr('stop-color', '#c00')
+            .attr('stop-opacity', 1);
+        grad.append('stop')
+            .attr('offset', '50%')
+            .attr('stop-color', '#f0ee03')
+            .attr('stop-opacity', 0.65);
+        grad.append('stop')
+            .attr('offset', '100%')
+            .attr('stop-color', '#0c0')
+            .attr('stop-opacity', 1);
+
+        // * Rect
         let bars = this.barGroup
             .selectAll('.bar')
             .data(this.viewModel.dataPoints);
         bars.enter()
             .append('rect')
             .classed('bar', true)
-            .attr('width', xScale.bandwidth())
-            .attr('height', (d) => height - yScale(d.value) - this.settings.axis.x.padding)
-            .attr('x', (d) => xScale(d.category))
-            .attr('y', (d) => yScale(d.value))
-            .style('fill', 'rgb(57, 123, 180)');
+            .attr('x', xScale(-100))
+            .attr('y', (d) => yScale(d.category))
+            .attr('rx', 2)
+            .attr('ry', 2)
+            .attr('width', width - 160)
+            .attr('height', yScale.bandwidth())
+            .attr('fill', 'url(#gradient)');
         bars
-            .attr('width', xScale.bandwidth())
-            .attr('height', (d) => height - yScale(d.value) - this.settings.axis.x.padding)
-            .attr('x', (d) => xScale(d.category))
-            .attr('y', (d) => yScale(d.value));
-        bars.exit().remove();
+            .attr('x', xScale(-100))
+            .attr('y', (d) => yScale(d.category))
+            .attr('width', width - 160)
+            .attr('height', yScale.bandwidth());
 
-        //
-        // ** BARS - PERCENTAGE
-        //
-        let pBars = this.pBarGroup
-            .selectAll('.pbar')
+        // * Scale
+        let scale = this.scaleGroup
+            .selectAll('.scale-bar')
             .data(this.viewModel.dataPoints);
-        pBars.enter()
+        scale.enter()
             .append('rect')
-            .classed('pbar', true)
-            .attr('width', (xScale.bandwidth() / 4) + 20)
-            .attr('height', (d) => (d.value) ? 30 : 0)
-            .attr('x', (d) => xScale(d.category) + xScale.bandwidth() - 10)
-            .attr('y', (d) => height - this.settings.axis.x.padding - 40)
-            .attr('rx', 5)
-            .attr('ry', 5)
-            .style('fill', 'rgba(220, 0, 0, 0.623)')
-            .style('position', 'relative')
-            .style('display', (d, i) => {
-                // remove the last percentage bar
-                return (this.viewModel.dataPoints[i + 1])
-                    ? 'block'
-                    : 'none';
-            });
-        pBars
-            .attr('width', (xScale.bandwidth() / 4) + 20)
-            .attr('height', (d) => (d.value) ? 30 : 0)
-            .attr('x', (d) => xScale(d.category) + xScale.bandwidth() - 10)
-            .attr('y', (d) => height - this.settings.axis.x.padding - 40);
-        pBars.exit().remove();
-
-        //
-        // ** LABELS - DIFFERENCE IN PERCENTAGE
-        //
-        let pLabels = this.pLabelGroup
-            .selectAll('.plabel')
-            .data(this.viewModel.dataPoints);
-        pLabels.enter()
-            .append('text')
-            .classed('plabel', true)
-            .text((d, i) => this.calcPercentDiff(d, i))
-            .attr('x', (d) => xScale(d.category) + xScale.bandwidth() + (xScale.bandwidth() / 8))
-            .attr('y', (d) => height - this.settings.axis.x.padding - 20)
-            .style('position', 'absolute')
-            .style('font-size', '0.85em')
-            .style('text-anchor', 'middle')
-            .style('fill', 'white')
-            .style('z-index', 100)
-            .style('display', (d, i) => {
-                return (this.viewModel.dataPoints[i + 1])
-                    ? 'inline-block'
-                    : 'none';
-            });
-        pLabels
-            .text((d, i) => this.calcPercentDiff(d, i))
-            .attr('x', (d) => xScale(d.category) + xScale.bandwidth() + (xScale.bandwidth() / 8))
-            .attr('y', (d) => height - this.settings.axis.x.padding - 20);
-        pLabels.exit().remove();
-
-
-        //
-        // ** lABELS - PERCENTAGE
-        //
-        let labels = this.labelGroup
-            .selectAll('.v-label')
-            .data(this.viewModel.dataPoints);
-        labels.enter()
-            .append('text')
-            .classed('v-label', true)
-            .text((d) => this.getPercentageLabels(d))
-            .attr('x', (d) => xScale(d.category) + (xScale.bandwidth() / 2))
-            .attr('y', (d) => yScale(d.value) - (height * 0.01))
-            .attr("text-anchor", "middle")
-            .style('font-size', '0.9em');
-        labels
-            .text((d) => this.getPercentageLabels(d))
-            .attr('x', (d) => xScale(d.category) + (xScale.bandwidth() / 2))
-            .attr('y', (d) => yScale(d.value) - (height * 0.01))
-            .attr("text-anchor", "middle");
-        labels.exit().remove();
-
-        //
-        // ** LABELS - DATA
-        //
-        let dLabels = this.labelGroup
-            .selectAll('.d-label')
-            .data(this.viewModel.dataPoints);
-        dLabels.enter()
-            .append('text')
-            .classed('d-label', true)
-            .text((d) => this.getDataLabels(d))
-            .attr('x', (d) => xScale(d.category) + (xScale.bandwidth() / 2))
-            .attr('y', (d) => (d.value) ? yScale(d.value) - 23 : 0)
-            .attr("text-anchor", "middle")
-            .style('font-size', '1.05em')
-            .style('font-weight', '500')
-            .style('fill', 'rgb(57, 123, 180)');
-        dLabels
-            .text((d) => this.getDataLabels(d))
-            .attr('x', (d) => xScale(d.category) + (xScale.bandwidth() / 2))
-            .attr('y', (d) => yScale(d.value) - 23)
-            .attr("text-anchor", "middle");
-        dLabels.exit().remove();
+            .classed('scale-bar', true)
+            .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
+            .attr('y', (d) => yScale(d.category) + (height / 30))
+            .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
+            .attr('height', innerYScale.bandwidth())
+            // .attr('transform', (d) => {
+            //     return (d.value >= 0) ? 'translate(0, 0)' : 'rotate(-180)';
+            // })
+            .attr('fill', 'black');
+        scale
+            .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
+            .attr('y', (d) => yScale(d.category) + (height / 30))
+            .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
+            .attr('height', innerYScale.bandwidth());
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {

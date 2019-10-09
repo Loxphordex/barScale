@@ -4,7 +4,7 @@ var powerbi = window[powerbiKey];
 
 var barScaleFE80866A28C34628876B06375447C054_DEBUG = {
     name: 'barScaleFE80866A28C34628876B06375447C054_DEBUG',
-    displayName: 'barScale',
+    displayName: 'BarScale',
     class: 'Visual',
     version: '1.0.0',
     apiVersion: '2.6.0',
