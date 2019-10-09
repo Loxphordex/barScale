@@ -6,6 +6,16 @@ p em {
   background: yellow;
   padding: 5px;
 }
+.bar-chart {
+  position: relative;
+  z-index: 1;
+}
+.bar-chart .bar-group {
+  z-index: 100;
+}
+.bar-chart .scale-group {
+  z-index: 200;
+}
 
 
 /*# sourceMappingURL=visual.css.map*/

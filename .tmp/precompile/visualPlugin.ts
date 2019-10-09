@@ -2,8 +2,8 @@ import { Visual } from "../../src/visual";
 var powerbiKey = "powerbi";
 var powerbi = window[powerbiKey];
 
-var barScaleFE80866A28C34628876B06375447C054_DEBUG = {
-    name: 'barScaleFE80866A28C34628876B06375447C054_DEBUG',
+var barScaleFE80866A28C34628876B06375447C054 = {
+    name: 'barScaleFE80866A28C34628876B06375447C054',
     displayName: 'BarScale',
     class: 'Visual',
     version: '1.0.0',
@@ -21,7 +21,7 @@ var barScaleFE80866A28C34628876B06375447C054_DEBUG = {
 if (typeof powerbi !== "undefined") {
     powerbi.visuals = powerbi.visuals || {};
     powerbi.visuals.plugins = powerbi.visuals.plugins || {};
-    powerbi.visuals.plugins["barScaleFE80866A28C34628876B06375447C054_DEBUG"] = barScaleFE80866A28C34628876B06375447C054_DEBUG;
+    powerbi.visuals.plugins["barScaleFE80866A28C34628876B06375447C054"] = barScaleFE80866A28C34628876B06375447C054;
 }
 
-export default barScaleFE80866A28C34628876B06375447C054_DEBUG;
+export default barScaleFE80866A28C34628876B06375447C054;
