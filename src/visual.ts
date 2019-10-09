@@ -115,7 +115,10 @@ export class Visual implements IVisual {
         // * Axis
         let xScale = d3.scaleLinear()
             .domain([-100, 100])
-            .range([81, width - 80]);
+            .range([80, width - 80]);
+        let posXScale = d3.scaleLinear()
+            .domain([0, 100])
+            .range([0, (width / 2) - 80]);
         let xAxis = this.xAxis;
         xAxis.attr('transform', `translate(0, ${height - 50})`)
             .call(d3.axisBottom(xScale))
@@ -146,12 +149,16 @@ export class Visual implements IVisual {
             .attr('x1', '0%')
             .attr('y1', '0%')
             .attr('x2', '100%')
-            .attr('y2', '40%')
+            .attr('y2', '0%')
             .attr('spreadMethod', 'pad');
         grad.append('stop')
             .attr('offset', '0%')
             .attr('stop-color', '#c00')
             .attr('stop-opacity', 1);
+        grad.append('stop')
+            .attr('offset', '50%')
+            .attr('stop-color', '#f0ee03')
+            .attr('stop-opacity', 0.65);
         grad.append('stop')
             .attr('offset', '100%')
             .attr('stop-color', '#0c0')
@@ -166,6 +173,8 @@ export class Visual implements IVisual {
             .classed('bar', true)
             .attr('x', xScale(-100))
             .attr('y', (d) => yScale(d.category))
+            .attr('rx', 2)
+            .attr('ry', 2)
             .attr('width', width - 160)
             .attr('height', yScale.bandwidth())
             .attr('fill', 'url(#gradient)');
@@ -177,15 +186,13 @@ export class Visual implements IVisual {
         scale.enter()
             .append('rect')
             .classed('scale-bar', true)
-            .attr('x', (d) => xScale(-100))
+            .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
             .attr('y', (d) => yScale(d.category) + 18)
-            .attr('width', (d) => {
-                if (d.value >= 0) {
-                    return width - 160;
-                }
-                return width - 160;
-            })
+            .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
             .attr('height', innerYScale.bandwidth())
+            // .attr('transform', (d) => {
+            //     return (d.value >= 0) ? 'translate(0, 0)' : 'rotate(-180)';
+            // })
             .attr('fill', 'black');
     }
 
