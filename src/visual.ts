@@ -205,6 +205,9 @@ export class Visual implements IVisual {
             .attr('x', (d) => width - 50)
             .attr('y', (d) => yScale(d.category) + (height / 30))
             .style('font-weight', 'bold');
+        display
+            .attr('x', (d) => width - 50)
+            .attr('y', (d) => yScale(d.category) + (height / 30));
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
