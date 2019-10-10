@@ -67,7 +67,7 @@ export class Visual implements IVisual {
     private barGroup: Selection<SVGElement>;
     private gradient: Selection<SVGElement>;
     private display: Selection<SVGElement>;
-    private xPadding: number = 0.2;
+    private xPadding: number = 0;
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
