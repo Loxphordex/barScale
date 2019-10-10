@@ -193,6 +193,8 @@ export class Visual implements IVisual {
             .classed('scale-bar', true)
             .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
             .attr('y', (d) => yScale(d.category) + (height / 30))
+            .attr('rx', 1)
+            .attr('ry', 1)
             .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
             .attr('height', innerYScale.bandwidth())
             // .attr('transform', (d) => {
