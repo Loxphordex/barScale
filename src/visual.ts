@@ -137,7 +137,6 @@ export class Visual implements IVisual {
             .selectAll('.bar')
             .data(this.viewModel.dataPoints);
         bars.enter()
-            .append('rect')
             .classed('bar', true)
             .attr('width', xScale.bandwidth())
             .attr('height', (d) => height - yScale(d.value) - this.settings.axis.x.padding)
