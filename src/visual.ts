@@ -66,22 +66,8 @@ export class Visual implements IVisual {
     private scaleGroup: Selection<SVGElement>;
     private barGroup: Selection<SVGElement>;
     private gradient: Selection<SVGElement>;
-    private labelGroup: Selection<SVGElement>;
-    private dLabelGroup: Selection<SVGElement>;
-    private pLabelGroup: Selection<SVGElement>;
+    private display: Selection<SVGElement>;
     private xPadding: number = 0.2;
-    private xAxisGroup: Selection<SVGElement>;
-    private settings = {
-        axis: {
-            x: {
-                padding: 50
-            },
-
-            y: {
-                padding: 50
-            }
-        }
-    };
 
     constructor(options: VisualConstructorOptions) {
         this.host = options.host;
@@ -99,6 +85,8 @@ export class Visual implements IVisual {
             .classed('scale-group', true);
         this.gradient = this.svg.append('defs')
             .classed('gradient', true);
+        this.display = this.svg.append('g')
+            .classed('display', true);
     }
 
     public update(options: VisualUpdateOptions) {
@@ -206,6 +194,17 @@ export class Visual implements IVisual {
             .attr('y', (d) => yScale(d.category) + (height / 30))
             .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
             .attr('height', innerYScale.bandwidth());
+
+        let display = this.display
+            .selectAll('.display-num')
+            .data(this.viewModel.dataPoints);
+        display.enter()
+            .append('text')
+            .classed('display-num', true)
+            .text((d) => `${d.value}`)
+            .attr('x', (d) => width - 50)
+            .attr('y', (d) => yScale(d.category) + (height / 30))
+            .style('font-weight', 'bold');
     }
 
     private getViewModel(options: VisualUpdateOptions): ViewModel {
