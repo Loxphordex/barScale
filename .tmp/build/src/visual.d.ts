@@ -25,10 +25,6 @@ export declare class Visual implements IVisual {
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     private getViewModel;
-    private calcPercentDiff;
-    private getDataLabels;
-    private getPercentageLabels;
-    private static parseSettings;
     /**
      * This function gets called for each of the objects defined in the capabilities files and allows you to select which of the
      * objects and properties you want to expose to the users in the property pane.
