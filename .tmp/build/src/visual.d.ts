@@ -20,12 +20,8 @@ export declare class Visual implements IVisual {
     private scaleGroup;
     private barGroup;
     private gradient;
-    private labelGroup;
-    private dLabelGroup;
-    private pLabelGroup;
+    private display;
     private xPadding;
-    private xAxisGroup;
-    private settings;
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     private getViewModel;
