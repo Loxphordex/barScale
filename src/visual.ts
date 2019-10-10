@@ -185,9 +185,6 @@ export class Visual implements IVisual {
             .attr('ry', 1)
             .attr('width', (d) => (d.value >= 0) ? posXScale(d.value) : posXScale(d.value * -1))
             .attr('height', innerYScale.bandwidth())
-            // .attr('transform', (d) => {
-            //     return (d.value >= 0) ? 'translate(0, 0)' : 'rotate(-180)';
-            // })
             .attr('fill', 'black');
         scale
             .attr('x', (d) => (d.value >= 0) ? xScale(0) : xScale(d.value))
@@ -238,69 +235,6 @@ export class Visual implements IVisual {
         viewModel.maxValue = d3.max(viewModel.dataPoints, d => d.value);
 
         return viewModel;
-    }
-
-    private calcPercentDiff(d: DataPoint, i: number) {
-        if (!d.value) return '';
-        const data = this.viewModel.dataPoints;
-        if (data[i + 1]) {
-            /**
-             * To calculate the difference in percentage
-             * between data points:
-             * Numerator: next data point minus current data point
-             * Denominator: absolute value of current data point
-             * Divide numerator by denominator
-             * Multiply result by 100
-             * Limit the maximum decimal points to 2.
-             */
-            let d1 = d.value;
-            let d2 = data[i + 1].value;
-            let num = d2 - d1;
-            let den = Math.abs(d1);
-            let difference = (num / den) * 100;
-            let formattedDif = difference.toFixed(2);
-
-            if (data[i + 1].value < d.value) {
-                return `${formattedDif}%`;
-            }
-
-            if (data[i + 1].value > d.value) {
-                return `+${formattedDif}%`;
-            }
-
-            if (data[i + 1].value === d.value) return '+0.00%';
-        }
-        return '';
-    }
-
-    private getDataLabels(d: DataPoint) {
-        let dPoint = d.value.toFixed();
-
-        // unit assignment
-        if (dPoint.length < 4) return dPoint;
-        if (dPoint.length === 4) return `${dPoint[0]},${dPoint.slice(1)}`;
-        if (dPoint.length === 5) return `${dPoint.slice(0, 2)}.${dPoint.slice(2, 3)}K`;
-        if (dPoint.length === 6) return `${dPoint.slice(0, 3)}.${dPoint.slice(3, 4)}K`;
-        if (dPoint.length === 7) return `${dPoint.slice(0, 1)}.${dPoint.slice(1, 2)}M`;
-        if (dPoint.length === 8) return `${dPoint.slice(0, 2)}.${dPoint.slice(2, 3)}M`;
-        if (dPoint.length === 9) return `${dPoint.slice(0, 3)}.${dPoint.slice(3, 4)}M`;
-        if (dPoint.length === 10) return `${dPoint.slice(0, 1)}.${dPoint.slice(1, 2)}B`;
-        if (dPoint.length === 11) return `${dPoint.slice(0, 2)}.${dPoint.slice(2, 3)}B`;
-        if (dPoint.length === 12) return `${dPoint.slice(0, 3)}.${dPoint.slice(3, 4)}B`;
-        if (dPoint.length === 13) return `${dPoint.slice(0, 1)}.${dPoint.slice(1, 2)}T`;
-        return dPoint;
-    }
-
-    private getPercentageLabels(d: DataPoint) {
-        // finds the difference between the initial data value and the current data value
-        // then the difference is converted to a string
-        let max = d3.max(this.viewModel.dataPoints.map(data => data.value));
-        let diffFromMax = ((d.value / max) * 100);
-        return `${Math.round(diffFromMax)}%`;
-    }
-
-    private static parseSettings(dataView: DataView): VisualSettings {
-        return VisualSettings.parse(dataView) as VisualSettings;
     }
 
     /**
